@@ -17,17 +17,18 @@ import java.util.concurrent.ExecutorService;
 public class PlatformBenchmarkService {
 
     private final BenchmarkMetricsService metricsService;
-
     @Qualifier("platformExecutor")
-    private final ExecutorService executor;
+    private final ExecutorService platformExecutor;
+    @Qualifier("virtualExecutor")
+    private final ExecutorService virtualExecutor;
 
     public BenchmarkResponse runIoBenchmark() {
 
-        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();        //store current time
 
         try {
-
-            executor.submit(() -> {
+            platformExecutor.submit(() -> {                                     //submit task to thread pool
+                log.info("Running on thread: {}", Thread.currentThread());      //give thread name
                 Thread.sleep(100);
                 return null;
             }).get();

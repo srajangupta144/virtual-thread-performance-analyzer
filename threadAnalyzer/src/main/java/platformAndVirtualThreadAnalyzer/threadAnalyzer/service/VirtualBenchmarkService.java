@@ -21,9 +21,10 @@ public class VirtualBenchmarkService {
     private final Object lock = new Object();
 
     private final BenchmarkMetricsService metricsService;
-
+    @Qualifier("platformExecutor")
+    private final ExecutorService platformExecutor;
     @Qualifier("virtualExecutor")
-    private final ExecutorService executor;
+    private final ExecutorService virtualExecutor;
 
     public BenchmarkResponse runIoBenchmark() {
 
@@ -31,14 +32,11 @@ public class VirtualBenchmarkService {
 
         try {
 
-            Future<String> future = executor.submit(() -> {
-
+        virtualExecutor.submit(() -> {
+                log.info("Running on thread: {}", Thread.currentThread());
                 Thread.sleep(100);
-
                 return "SUCCESS";
-            });
-
-            future.get();
+            }).get();
 
             long duration = System.currentTimeMillis() - start;
 
@@ -75,7 +73,7 @@ public class VirtualBenchmarkService {
 
         try {
 
-            executor.submit(() -> {
+            virtualExecutor.submit(() -> {
 
                 synchronized (lock) {
 
