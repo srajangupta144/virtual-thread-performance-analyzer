@@ -3,7 +3,5 @@ public enum BenchmarkMode {
 
     PLATFORM,
     VIRTUAL,
-    VIRTUAL_PINNED,
-    CPU_BOUND,
-    MIXED
+    VIRTUAL_PINNED
 }

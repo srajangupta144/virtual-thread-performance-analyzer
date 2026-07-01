@@ -1,35 +1,46 @@
 package platformAndVirtualThreadAnalyzer.threadAnalyzer.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import platformAndVirtualThreadAnalyzer.threadAnalyzer.config.BenchmarkProperties;
 import platformAndVirtualThreadAnalyzer.threadAnalyzer.dto.BenchmarkResponse;
 import platformAndVirtualThreadAnalyzer.threadAnalyzer.exceptions.BenchmarkException;
 import platformAndVirtualThreadAnalyzer.threadAnalyzer.metrics.BenchmarkMetricsService;
+import platformAndVirtualThreadAnalyzer.threadAnalyzer.metrics.BenchmarkThreadMetrics;
 import platformAndVirtualThreadAnalyzer.threadAnalyzer.model.BenchmarkMode;
 
 import java.util.concurrent.ExecutorService;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PlatformBenchmarkService {
 
     private final BenchmarkMetricsService metricsService;
-    @Qualifier("platformExecutor")
+    private final BenchmarkThreadMetrics threadMetrics;
     private final ExecutorService platformExecutor;
-    @Qualifier("virtualExecutor")
-    private final ExecutorService virtualExecutor;
+    private final BenchmarkProperties properties;
+
+    public PlatformBenchmarkService(
+            BenchmarkMetricsService metricsService,
+            BenchmarkThreadMetrics threadMetrics,
+            @Qualifier("platformExecutor") ExecutorService platformExecutor,
+            BenchmarkProperties properties) {
+        this.metricsService = metricsService;
+        this.threadMetrics = threadMetrics;
+        this.platformExecutor = platformExecutor;
+        this.properties = properties;
+    }
 
     public BenchmarkResponse runIoBenchmark() {
 
-        long start = System.currentTimeMillis();        //store current time
+        long start = System.currentTimeMillis();
 
         try {
-            platformExecutor.submit(() -> {                                     //submit task to thread pool
-                log.info("Running on thread: {}", Thread.currentThread());      //give thread name
-                Thread.sleep(100);
+            threadMetrics.getPlatformThreads().incrementAndGet();
+
+            platformExecutor.submit(() -> {
+                Thread.sleep(properties.getSimulatedIoDelayMs());
                 return null;
             }).get();
 
@@ -45,8 +56,11 @@ public class PlatformBenchmarkService {
                     .build();
 
         } catch (Exception ex) {
-            throw new BenchmarkException(
-                    "Platform benchmark failed", ex);
+            metricsService.incrementBenchmarkErrors(BenchmarkMode.PLATFORM);
+            throw new BenchmarkException("Platform benchmark failed", ex);
+
+        } finally {
+            threadMetrics.getPlatformThreads().decrementAndGet();
         }
     }
 }

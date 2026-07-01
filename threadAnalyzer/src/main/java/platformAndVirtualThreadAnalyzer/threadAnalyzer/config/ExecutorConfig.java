@@ -19,10 +19,4 @@ public class ExecutorConfig {
                 properties.getPlatformThreadPoolSize()
         );
     }
-
-    @Bean(name = "virtualExecutor")
-    public ExecutorService virtualExecutor() {
-
-        return Executors.newVirtualThreadPerTaskExecutor();
-    }
 }

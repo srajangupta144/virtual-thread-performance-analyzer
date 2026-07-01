@@ -1,7 +1,5 @@
 package platformAndVirtualThreadAnalyzer.threadAnalyzer.service;
 
-import org.springframework.stereotype.Service;
-import platformAndVirtualThreadAnalyzer.threadAnalyzer.controller.Benchmark;
 import platformAndVirtualThreadAnalyzer.threadAnalyzer.dto.BenchmarkResponse;
 
 public interface BenchmarkService {

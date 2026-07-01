@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 public class BenchmarkProperties {
-    private int platformThreadPoolSize;
-    private long simulatedIoDelayMs;
+    private int platformThreadPoolSize=200;
+    private long simulatedIoDelayMs=500;
 }
